@@ -154,8 +154,27 @@ tim remove bootstrap@0.1.0   # remove one version
 
 ## Publishing a package
 
-There is no `tim publish` command. Publishing means adding your package to
-[`packages.json`](packages.json) via a pull request to this repo. The flow:
+The easy path is `tim publish`, which validates your package, forks this
+repo, adds the entry, and opens the pull request for you:
+
+```bash
+cd my-widgets
+tim publish --tags "tim, widgets, ui" --dry-run   # preview the entry, changes nothing
+tim publish --tags "tim, widgets, ui"             # validate, fork, PR
+```
+
+On first run it asks for a GitHub token (least-privilege `public_repo`
+scope is enough) and a password, then stores the token encrypted in
+`~/.tim/secret` (Argon2id + XChaCha20-Poly1305). Every later run just asks
+for the password. Useful flags: `--path <dir>` to publish a different
+directory, `--web <url>` to override the homepage, `--message <text>` to
+append PR body text, `--direct` to push the branch to this repo instead of
+a fork (maintainers), `--reset-token` to replace the stored token, and
+`--yes` to skip the confirmation prompt.
+
+Prefer the manual route? It is equivalent: add your package to
+[`packages.json`](packages.json) via a pull request to this repo. The full
+requirements below apply either way.
 
 ### Step 1. Put your package in a public git repo
 
@@ -163,7 +182,8 @@ Any public host that serves git over HTTPS works (GitHub recommended).
 
 ### Step 2. Add a `tim.config.yml` manifest at the repo root
 
-The file must be named exactly `tim.config.yml`. Minimal example for a package:
+The canonical name is `tim.config.yml` (`tim.config.yaml` is also accepted).
+Minimal example for a package:
 
 ```yaml
 name: my-widgets
@@ -208,7 +228,15 @@ tim install https://github.com/<you>/<repo>.git
 
 If both work, the package is ready for the registry.
 
-### Step 5. Open a PR adding your entry to `packages.json`
+### Step 5. Submit the entry (`tim publish`, or a manual PR)
+
+With `tim publish` (recommended) this step is automatic: it re-validates the
+manifest, checks the name is still free, forks this repo, inserts your entry
+in sorted order on a branch named `add-<name>-<time>`, pushes, and opens the
+PR with the checklist pre-filled. Review the checklist below anyway so the
+PR sails through.
+
+Manual alternative:
 
 1. Fork this repo and add one JSON object to the array in `packages.json`, keeping entries sorted by `name`.
 2. Double check every required field from the table above (`web` included, otherwise the client skips your entry).
@@ -238,10 +266,10 @@ Example diff:
 Validation checklist for reviewers:
 
 - [ ] Entry is valid JSON and keeps alphabetical order by `name`.
-- [ ] `name` matches the `name` in the package `tim.config.yml`.
+- [ ] `name` matches the `name` in the package manifest.
 - [ ] `url` clones anonymously (`git ls-remote <url> HEAD` succeeds).
-- [ ] Repo root contains `tim.config.yml` with `name`, `version`, `description`, `license`.
-- [ ] At least one semver tag exists (or PR notes the package is intentionally `HEAD`-only).
+- [ ] Repo root contains `tim.config.yml` (or `.yaml`) with `name`, `version`, `description`, `license`.
+- [ ] At least one semver tag exists (or the package is intentionally untagged and installs from the default branch).
 - [ ] No name squatting or trademark conflicts.
 
 ### Updating or removing your package
