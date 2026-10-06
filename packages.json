@@ -1,0 +1,19 @@
+[
+  {
+    "name": "bootstrap",
+    "url": "https://github.com/tim-engine/bootstrap.timl",
+    "method": "git",
+    "tags": [
+      "tim",
+      "timl",
+      "bootstrap",
+      "frontend",
+      "components",
+      "css",
+      "ui"
+    ],
+    "description": "Bootstrap v5.x components for Tim Engine",
+    "license": "MIT",
+    "web": "https://github.com/tim-engine/bootstrap.timl"
+  }
+]
